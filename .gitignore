@@ -127,3 +127,13 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Project
+bert/
+general_tiny/
+glue_data/
+train_json/
+temp_tinybert/
+data.txt
+glove.42B.300d.txt
+cache
