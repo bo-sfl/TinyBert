@@ -365,21 +365,25 @@ def main():
     vocab_list = list(tokenizer.vocab.keys())
     doc_num = 0
     with DocumentDatabase(reduce_memory=args.reduce_memory) as docs:
-        with args.train_corpus.open() as f:
-            doc = []
-            for line in tqdm(f, desc="Loading Dataset", unit=" lines"):
-                line = line.strip()
-                if line == "":
-                    docs.add_document(doc)
+        import os
+        for root, dirs, files in os.walk(args.train_corpus, topdown=False):
+            for name in files:
+                logger.info(f'Start on {Path(root, name)}')
+                with Path(root, name).open() as f:
                     doc = []
-                    doc_num += 1
-                    if doc_num % 100 == 0:
-                        logger.info('loaded {} docs!'.format(doc_num))
-                else:
-                    tokens = tokenizer.tokenize(line)
-                    doc.append(tokens)
-            if doc:
-                docs.add_document(doc)  # If the last doc didn't end on a newline, make sure it still gets added
+                    for line in tqdm(f, desc="Loading Dataset", unit=" lines"):
+                        line = line.strip()
+                        if line == "":
+                            docs.add_document(doc)
+                            doc = []
+                            doc_num += 1
+                            if doc_num % 100 == 0:
+                                logger.info('loaded {} docs!'.format(doc_num))
+                        else:
+                            tokens = tokenizer.tokenize(line)
+                            doc.append(tokens)
+                    if doc:
+                        docs.add_document(doc)  # If the last doc didn't end on a newline, make sure it still gets added
         if len(docs) <= 1:
             exit("ERROR: No document breaks were found in the input file! These are necessary to allow the script to "
                  "ensure that random NextSentences are not sampled from the same document. Please add blank lines to "
